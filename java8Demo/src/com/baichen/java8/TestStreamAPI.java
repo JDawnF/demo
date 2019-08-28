@@ -14,7 +14,7 @@ import org.junit.Test;
  * 2. 中间操作
  * 3. 终止操作(终端操作)
  */
-public class TestStreamaAPI {
+public class TestStreamAPI {
 
     //1. 创建 Stream，有4种方式
     @Test
@@ -82,7 +82,7 @@ public class TestStreamaAPI {
         }
     }
 
-//    截断流，使其元素不超过给定数量
+    //    截断流，使其元素不超过给定数量
     @Test
     public void test4() {
         emps.stream()
@@ -93,7 +93,7 @@ public class TestStreamaAPI {
                 .forEach(System.out::println);// 终止操作
     }
 
-// 跳过元素，返回一个扔掉了前 n 个元素的流。若流中元素不足 n 个，则返回一个空流。与 limit(n) 互补
+    // 跳过元素，返回一个扔掉了前 n 个元素的流。若流中元素不足 n 个，则返回一个空流。与 limit(n) 互补
     @Test
     public void test5() {
         emps.parallelStream()
@@ -107,5 +107,63 @@ public class TestStreamaAPI {
         emps.stream()
                 .distinct()// 去重
                 .forEach(System.out::println);
+    }
+
+    /**
+     * 映射
+     * map -- 接收Lambda，将元素转换成其他形式或提取信息。接受一个函数作为参数，
+     * 该函数会被应用到每个元素上，并将其映射成一个新的元素
+     * flatMap -- 接受一个函数作为参数，将流中的每个值都换成另一个流，然后把所有流连接成一个流
+     * 这两个类似于List中的add和addAll，前者是添加了一个list，后者是将一个list中的元素一个个取出添加到list
+     */
+    @Test
+    public void test7() {
+        List<String> list = Arrays.asList("aaa", "bbb", "ccc");
+        list.stream()
+                .map((str) -> str.toUpperCase())    // 转为大写
+                .forEach(System.out::println);
+
+        System.out.println("-------------------------------");
+//        emps.stream().map(Employee::getName).forEach(System.out::println);// 获取员工姓名
+        // 嵌套流，最里层是字符
+//        Stream<Stream<Character>> stream = list.stream().map(TestStreamAPI::filterCharacter);
+//        stream.forEach((sm) -> sm.forEach(System.out::println));//遍历流和字符串
+
+        //将所有流转为一个流
+        Stream<Character> stream1 = list.stream().flatMap(TestStreamAPI::filterCharacter);
+        stream1.forEach(System.out::println);
+    }
+
+    // 将字符串转为字符
+    public static Stream<Character> filterCharacter(String str) {
+        List<Character> list = new ArrayList<>();
+
+        for (Character ch : str.toCharArray()) {
+            list.add(ch);
+        }
+        return list.stream();
+    }
+
+    /*
+		sorted()——自然排序(Comparable)
+		sorted(Comparator com)——定制排序(Comparator,即自定义排序)
+	 */
+    @Test
+    public void test8() {
+        emps.stream()
+                .map(Employee::getName)
+                .sorted()
+                .forEach(System.out::println);
+
+        System.out.println("------------------------------------");
+
+        emps.stream()
+                .sorted((x, y) -> {
+                    if (x.getAge() == y.getAge()) {//先按年龄排，然后再按姓名排
+                        return x.getName().compareTo(y.getName());
+                    } else {
+                        return Integer.compare(x.getAge(), y.getAge());
+                    }
+                }).forEach(System.out::println);
     }
 }
